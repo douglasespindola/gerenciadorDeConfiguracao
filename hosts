@@ -1,0 +1,6 @@
+[balancer]
+192.168.122.116 ansible_ssh_user=root
+
+[nodeapp]
+192.168.122.116 ansible_ssh_user=root
+

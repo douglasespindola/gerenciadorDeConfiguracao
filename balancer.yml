@@ -1,0 +1,37 @@
+---
+- hosts: balancer
+  tasks:
+    - name: Instalação de pacotes básicos
+      apt: name={{ item }} state=installed
+      with_items:
+        - build-essential
+        - mutt
+        - openssh-client
+        - python-pip
+        - python3-pip
+      tags:
+        - packages
+    - name: Instalar nginx
+      apt: name=nginx state=latest
+      become: yes
+    - name: Iniciar nginx
+      service:
+          name: nginx
+          state: started
+      become: yes
+    - name: copiar arquivo de configuração e reiniciar o nginx
+      copy:
+        src: $PWD/files/config/meudominio.conf
+        dest: /etc/nginx/sites-available/meudominio.conf
+      become: yes
+    - name: criar link simbolico
+      file:
+        src: /etc/nginx/sites-available/meudominio.conf
+        dest: /etc/nginx/sites-enabled/default
+        state: link
+      become: yes
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+      become: yes
