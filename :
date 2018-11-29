@@ -1,0 +1,59 @@
+---
+- hosts: nodeapp
+  vars:
+    project_path: /var/www/nodejs
+    ansible_user_id: root
+  tasks:
+    - name: instalação nvm
+      shell: 
+        curl https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
+        creates=/home/{{ ansible_user_id }}/.nvm/nvm.sh
+    - name: instalação do node
+      shell:
+        /bin/bash -c "source ~/.nvm/nvm.sh && nvm install 10.14.0 && nvm alias default 10.14.0"
+        creates=/home/{{ ansible_user_id }}/.nvm/alias
+#    - name: Criação pasta para aplicações node
+#      file:
+#        path:/var/www/nodejs
+#        mode=0755
+#        recurse=yes
+#        state=directory
+#    - name: Definição de variáveis
+#      set_fact:
+#        release_path: "{{ project_path }}/releases/{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
+#        current_path: "{{ project_path }}/current"
+#    - name: Recuperar pasta de lançamento atual
+#      command: readlink -f current
+#      register: current_release_path
+#      ignore_errors: yes
+#      args:
+#        chdir: "{{ project_path }}"
+#    - name: Create new folder
+#      file:
+#        dest={{ release_path }}
+#        mode=0755
+#        recurse=yes
+#        state=directory
+#    - name: Clone the repository
+#      git:
+#        repo: git@github.com:USERNAME/REPO.git
+#        dest: "{{ release_path }}"
+#    - name: Update npm
+#      npm:
+#        path={{ release_path }}
+#    - name: Update symlink
+#      file:
+#        src={{ release_path }}
+#        dest={{ current_path }}
+#        state=link
+#    - name: Delete old pm2 process
+#      command: pm2 delete ws-node
+#     ignore_errors: yes
+#    - name: Start pm2
+#      command: pm2 start {{ current_path }}/server.js --name node-app
+#    - name: Delete old dir
+#      shell: rm -rf {{ current_release_path.stdout }}/
+#      when: current_release_path.stdout != current_path  
+#
+# - name: Deploy da aplicação com pm2
+#     command: pm2 start {{ current_path }}/server.js --name node-app
