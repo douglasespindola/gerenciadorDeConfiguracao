@@ -3,6 +3,7 @@
   vars:
     project_path: /var/www/nodejs
     ansible_user_id: root
+    version_nodeapp: 1.0.0
   tasks:
     - name: Instalação nvm
       shell: 
@@ -12,9 +13,56 @@
       shell:
         /bin/bash -c "source ~/.nvm/nvm.sh && nvm install 10.14.0 && nvm alias default 10.14.0"
         creates=/home/{{ ansible_user_id }}/.nvm/alias
-#    - name: Criação pasta para aplicações node
+    - name: Criação pasta para aplicações node
+      file: 
+        path=/var/www/nodejs
+        mode=0755
+        recurse=yes
+        state=directory
+    - name: Copia versão do projeto
+      copy: 
+        src: ./deploy/app_v{{version_nodeapp}}.js
+        dest: /var/www/nodejs
+      become: yes
+    - name: Criar link simbolico npm
+      file: 
+        src: /root/.nvm/versions/node/v10.14.0/bin/npm
+        dest: /usr/bin
+        state: link
+    - name: Instalação de dependências
+      npm:
+        name: express
+        path: /var/www/nodejs/app_v{{version_nodeapp}}.js    
+        state: latest
+    - name:  Instalação pm2
+      npm:
+        name: pm2
+        global: yes
+        production: yes
+        state: present
+#    - name: Definição de variáveis
+#      set_fact:
+#        release_path: "{{ project_path }}/releases/{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
+#        current_path: "{{ project_path }}/current"
+#    - name: Recuperar pasta de lançamento atual
+#      command: readlink -f current
+#      register: current_release_path
+#      ignore_errors: yes
+#      args:
+#        chdir: "{{ project_path }}"
+#    - name: Create new folder
 #      file:
-#        path:/var/www/nodejs
+#        dest={{ release_path }}
 #        mode=0755
 #        recurse=yes
 #        state=directory
+#    - name: Update symlink
+#      file:
+#        src={{ release_path }}
+#        dest={{ current_path }}
+#        state=link
+#    - name: Remover versão antiga de aplicação no pm2
+#      command: pm2 delete ws-node
+#     ignore_errors: yes
+#    - name: iniciar novo processo com pm2
+#      command: pm2 start {{ current_path }}/server.js --name node-app
