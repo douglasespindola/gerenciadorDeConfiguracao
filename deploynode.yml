@@ -2,17 +2,18 @@
 - hosts: nodeapp
   vars:
     project_path: /var/www/nodejs
-    ansible_user_id: root
+    ansible_user: root
     version_nodeapp: 1.0.0
+    nvm_node_version: 10.14.0
   tasks:
     - name: Instalação nvm
       shell: 
         curl https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
-        creates=/home/{{ ansible_user_id }}/.nvm/nvm.sh
+        creates=/home/{{ ansible_user }}/.nvm/nvm.sh
     - name: instalação node LTS
       shell:
-        /bin/bash -c "source ~/.nvm/nvm.sh && nvm install 10.14.0 && nvm alias default 10.14.0"
-        creates=/home/{{ ansible_user_id }}/.nvm/alias
+        /bin/bash -c "source ~/.nvm/nvm.sh && nvm install {{nvm_node_version}} && nvm alias default {{nvm_node_version}}"
+        creates=/home/{{ ansible_user }}/.nvm/alias
     - name: Criação pasta para aplicações node
       file: 
         path=/var/www/nodejs
@@ -24,22 +25,27 @@
         src: ./deploy/app_v{{version_nodeapp}}.js
         dest: /var/www/nodejs
       become: yes
-    - name: Criar link simbolico npm
-      file: 
-        src: /root/.nvm/versions/node/v10.14.0/bin/npm
-        dest: /usr/bin
-        state: link
+#Solução abaixo foi implementada pois o modulo npm do ansible não está funcional com a versão 6.4.1 que foi instalada juntamente com o node LTS através no nvm.
+    - name: Instalação npm 3.5.2
+      apt:
+        name: npm
+        state: installed
     - name: Instalação de dependências
+      become: yes
+      become_user: "{{ ansible_ssh_user }}"
       npm:
-        name: express
-        path: /var/www/nodejs/app_v{{version_nodeapp}}.js    
-        state: latest
+       name: express
+       global: no
+       path: /var/www/nodejs/app_v{{version_nodeapp}}.js    
+       state: present
     - name:  Instalação pm2
+      become: yes
+      become_user: "{{ ansible_ssh_user }}"
       npm:
-        name: pm2
-        global: yes
-        production: yes
-        state: present
+       name: pm2
+       global: yes
+       production: yes
+       state: present
 #    - name: Definição de variáveis
 #      set_fact:
 #        release_path: "{{ project_path }}/releases/{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
