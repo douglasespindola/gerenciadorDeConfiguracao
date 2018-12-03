@@ -10,7 +10,7 @@
       shell: 
         curl https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash
         creates=/home/{{ ansible_user }}/.nvm/nvm.sh
-    - name: instalação node LTS
+    - name: instalação node {{nvm_node_version}}
       shell:
         /bin/bash -c "source ~/.nvm/nvm.sh && nvm install {{nvm_node_version}} && nvm alias default {{nvm_node_version}}"
         creates=/home/{{ ansible_user }}/.nvm/alias
@@ -20,7 +20,7 @@
         mode=0755
         recurse=yes
         state=directory
-    - name: Copia versão do projeto
+    - name: Copia projeto versão {{version_nodeapp}}
       copy: 
         src: ./deploy/app_v{{version_nodeapp}}.js
         dest: /var/www/nodejs
@@ -46,6 +46,8 @@
        global: yes
        production: yes
        state: present
+    - name: Iniciar aplicação com pm2
+      command: pm2 start {{ project_path }}/app_v{{version_nodeapp}}.js/ -i max
 #    - name: Definição de variáveis
 #      set_fact:
 #        release_path: "{{ project_path }}/releases/{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
@@ -70,5 +72,3 @@
 #    - name: Remover versão antiga de aplicação no pm2
 #      command: pm2 delete ws-node
 #     ignore_errors: yes
-#    - name: iniciar novo processo com pm2
-#      command: pm2 start {{ current_path }}/server.js --name node-app
