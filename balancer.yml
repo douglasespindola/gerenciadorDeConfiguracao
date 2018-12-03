@@ -19,14 +19,14 @@
           name: nginx
           state: started
       become: yes
-    - name: copiar arquivo de configuração e reiniciar o nginx
+    - name: copiar arquivo de configuração
       copy:
-        src: $PWD/files/config/meudominio.conf
-        dest: /etc/nginx/sites-available/meudominio.conf
+        src: ./files/config/dominio.conf
+        dest: /etc/nginx/sites-available/dominio.conf
       become: yes
-    - name: criar link simbolico
+    - name: criar link simbolico para sites-enabled
       file:
-        src: /etc/nginx/sites-available/meudominio.conf
+        src: /etc/nginx/sites-available/dominio.conf
         dest: /etc/nginx/sites-enabled/default
         state: link
       become: yes
