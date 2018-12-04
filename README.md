@@ -42,7 +42,7 @@ $ ansible-playbook deploynode.yml
 
 ```
 
-### Script teste de coneção
+### Script teste de conexão
 
 O script de conexão executará um loop de gets no dominio conforme a quantidade de conexões especificado, exemplo:
 
