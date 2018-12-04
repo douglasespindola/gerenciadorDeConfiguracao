@@ -2,7 +2,7 @@
 
 Este projeto contempla arquivos para criação e configuração de aplicações node básicas, sendo balanceadas pelo servidor nginx como proxy reverso.
 
-## Requisitos
+### Requisitos
 
 - Asible
 
@@ -39,4 +39,13 @@ No playbook acima foi utilizado um certificado auto-assinado para que fosse poss
 
 ```shell
 $ ansible-playbook deploynode.yml
+
+```
+
+### Script teste de coneção
+
+O script de conexão executará um loop de gets no dominio conforme a quantidade de conexões especificado, exemplo:
+
+```shell
+$ teste-conexao.sh 2000 http://dominio.com.br 
 ```
