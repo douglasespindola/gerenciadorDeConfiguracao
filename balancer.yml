@@ -11,7 +11,7 @@
         - python3-pip
       tags:
         - packages
-    - name: Instalar nginx
+    - name: Instalação nginx
       apt: name=nginx state=latest
       become: yes
     - name: Iniciar nginx
@@ -19,18 +19,24 @@
           name: nginx
           state: started
       become: yes
-    - name: copiar arquivo de configuração
+    - name: Copiar arquivo de configuração
       copy:
         src: ./files/config/dominio.conf
         dest: /etc/nginx/sites-available/dominio.conf
       become: yes
-    - name: criar link simbolico para sites-enabled
+    - name: Criar link simbolico para sites-enabled
       file:
         src: /etc/nginx/sites-available/dominio.conf
         dest: /etc/nginx/sites-enabled/default
         state: link
       become: yes
-    - name: restart nginx
+    - name: Copiar certificados SSL
+      copy:
+        src: ./files/certs/certificadoDominio.crt
+        dest: /etc/nginx/certs/
+        src: ./files/certs/certificadoDominio.key
+        dest: /etc/nginx/certs/
+    - name: Restart nginx
       service:
         name: nginx
         state: restarted
