@@ -13,7 +13,7 @@ Este projeto contempla arquivos para criação e configuração de aplicações 
 neste exemplo será utilizado o usuário root, para facilitar sugerimos que seja feita a copia da sua chave publica para o host com o comando abaixo:
 
 ```shell 
- ssh-copy-id root@192.168.122.116
+$ ssh-copy-id root@192.168.122.116
 ```
 
 OBS: Por padrão o usuário root não vem habilitado para acessar o servidor através de ssh. dessa forma, é necessário liberar no arquivo /etc/ssh/sshd_config modificando a linha abaixo:
@@ -22,8 +22,21 @@ OBS: Por padrão o usuário root não vem habilitado para acessar o servidor atr
 PermitRootLogin yes
 ```
 
-## Instalando ambiente
+## Instalação proxy reverso do ambiente
 
 ```shell
-ansible-playbook balancer.yml 
+$ ansible-playbook balancer.yml 
+```
+No playbook acima foi utilizado um certificado auto-assinado para que fosse possível subir o nginx com configurações de HTTPS.
+
+## Instalação aplicação nodejs
+
+### Recursos utilizados
+- node LTS
+- npm
+- express
+- pm2
+
+```shell
+$ ansible-playbook deploynode.yml
 ```
