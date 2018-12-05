@@ -39,3 +39,15 @@
         name: nginx
         state: restarted
       become: yes
+    - name: Copiar script de relatório
+      copy:
+        src: ./scripts/relatorio.sh
+        dest: /etc/nginx/relatorio.sh
+        mode: 0755
+    - name: Adicionar rotina de relatório na crontab
+      cron:
+        name: Relatorio diario cron
+        minute: 59
+        hour: 23
+        user: root
+        job: "/etc/nginx/relatorio.sh"
