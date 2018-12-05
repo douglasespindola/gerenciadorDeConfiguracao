@@ -32,9 +32,7 @@
       become: yes
     - name: Copiar certificados SSL
       copy:
-        src: ./files/certs/certificadoDominio.crt
-        dest: /etc/nginx/certs/
-        src: ./files/certs/certificadoDominio.key
+        src: ./files/certs/
         dest: /etc/nginx/certs/
     - name: Restart nginx
       service:
