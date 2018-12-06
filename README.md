@@ -4,30 +4,34 @@ Este projeto contempla arquivos para criação e configuração de aplicações 
 
 ### Requisitos
 
-- Asible
+- Ansible
 
 ## Observações iniciais 
 
 É necessário que o usuário tenha permissão no sudoers. Afinal, ele estará instalando e configurando aplicações.
 
-neste exemplo será utilizado o usuário root, para facilitar sugerimos que seja feita a copia da sua chave publica para o host com o comando abaixo:
+Neste exemplo será utilizado o usuário root, para facilitar. Sugerimos que seja feita a copia da sua chave publica para o host com o comando abaixo:
 
 ```shell 
 $ ssh-copy-id root@192.168.122.116
 ```
+Todas as configurações foram efetuadas utilizando um domínio fake "dominio.com.br" que caso seja necessário utilizar para os teste deve ser inserida no hosts da máquina. 
 
-OBS: Por padrão o usuário root não vem habilitado para acessar o servidor através de ssh. dessa forma, é necessário liberar no arquivo /etc/ssh/sshd_config modificando a linha abaixo:
+Obs: Por padrão o usuário root não vem habilitado para acessar o servidor através de ssh. dessa forma, é necessário liberar no arquivo /etc/ssh/sshd_config, modificando a linha abaixo:
 
 ```shell
 PermitRootLogin yes
 ```
 
-## Instalação proxy reverso do ambiente
+## Instalação proxy reverso no ambiente
+
+No playbook abaixo foi utilizado um certificado auto-assinado, para que fosse possível subir o nginx com configurações de HTTPS.
+
+Ele também cria uma entrada da crontab, que enviará um relatório diário parseando as conexões efetuadas no servidor (relatorio.sh), para que o script funcione corretamente basta alterar a variável (email).
 
 ```shell
 $ ansible-playbook balancer.yml 
 ```
-No playbook acima foi utilizado um certificado auto-assinado para que fosse possível subir o nginx com configurações de HTTPS.
 
 ## Instalação aplicação nodejs
 
