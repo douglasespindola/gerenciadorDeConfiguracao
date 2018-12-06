@@ -3,7 +3,7 @@
   vars:
     project_path: /var/www/nodejs
     ansible_user: root
-    version_nodeapp: 1.5.4
+    version_nodeapp: 1.0.0
     nvm_node_version: 10.14.0
   tasks:
     - name: Instalação nvm
@@ -24,7 +24,7 @@
       set_fact:
         release_path: "{{ project_path }}/releases"
         current_path: "{{ project_path }}/current"
-    - name: Recuperar pasta de lançamento atual
+    - name: Recuperar pasta da versão atual
       command: readlink -f current
       register: current_release_path
       ignore_errors: yes
@@ -36,16 +36,16 @@
         mode=0755
         recurse=yes
         state=directory
-    - name: Link simbolico para versão corrente
-      file:
-        src={{ release_path }}
-        dest={{ current_path }}
-        state=link
     - name: Copia projeto versão {{version_nodeapp}}
       copy: 
         src: ./deploy/app_v{{version_nodeapp}}.js
         dest: /var/www/nodejs/releases
       become: yes
+    - name: Link simbolico para versão corrente
+      file:
+        src={{ release_path }}/app_v{{version_nodeapp}}.js
+        dest={{ current_path }}
+        state=link
 #Solução abaixo foi implementada pois o modulo npm do ansible não está funcional com a versão 6.4.1 que foi instalada juntamente com o node LTS através no nvm.
     - name: Instalação npm 3.5.2
       apt:
@@ -53,7 +53,7 @@
         state: installed
     - name: Instalação de dependências
       become: yes
-      become_user: "{{ ansible_ssh_user }}"
+      become_user: "{{ ansible_user }}"
       npm:
        name: express
        global: no
@@ -61,7 +61,7 @@
        state: present
     - name:  Instalação pm2
       become: yes
-      become_user: "{{ ansible_ssh_user }}"
+      become_user: "{{ ansible_user }}"
       npm:
        name: pm2
        global: yes
@@ -74,6 +74,7 @@
         state: link
     - name: Remove processos pm2 antigos
       command: pm2 delete all
+      ignore_errors: yes
     - name: Iniciar aplicação com pm2
       become_user: root
-      command: pm2 start {{project_path}}/current/app_v{{version_nodeapp}}.js/ -i max --watch
+      command: pm2 start {{project_path}}/current -i max --watch --name app{{version_nodeapp}}
