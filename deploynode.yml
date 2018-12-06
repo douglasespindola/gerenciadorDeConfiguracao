@@ -46,8 +46,14 @@
        global: yes
        production: yes
        state: present
+    - name: Link simbolico nodejs/node
+      file:
+        src: /usr/bin/nodejs
+        dest: /usr/bin/node
+        state: link
     - name: Iniciar aplicação com pm2
-      command: pm2 start {{ project_path }}/app_v{{version_nodeapp}}.js/ -i max
+      become_user: root
+      command: pm2 start {{project_path}}/app_v{{version_nodeapp}}.js/ -i max --watch
 #    - name: Definição de variáveis
 #      set_fact:
 #        release_path: "{{ project_path }}/releases/{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
