@@ -3,7 +3,7 @@
   vars:
     project_path: /var/www/nodejs
     ansible_user: root
-    version_nodeapp: 1.0.0
+    version_nodeapp: 1.5.4
     nvm_node_version: 10.14.0
   tasks:
     - name: Instalação nvm
@@ -20,10 +20,31 @@
         mode=0755
         recurse=yes
         state=directory
+    - name: Definição de paths para versões
+      set_fact:
+        release_path: "{{ project_path }}/releases"
+        current_path: "{{ project_path }}/current"
+    - name: Recuperar pasta de lançamento atual
+      command: readlink -f current
+      register: current_release_path
+      ignore_errors: yes
+      args:
+        chdir: "{{ project_path }}"
+    - name: Criar nova pasta de release
+      file:
+        dest={{ release_path }}
+        mode=0755
+        recurse=yes
+        state=directory
+    - name: Link simbolico para versão corrente
+      file:
+        src={{ release_path }}
+        dest={{ current_path }}
+        state=link
     - name: Copia projeto versão {{version_nodeapp}}
       copy: 
         src: ./deploy/app_v{{version_nodeapp}}.js
-        dest: /var/www/nodejs
+        dest: /var/www/nodejs/releases
       become: yes
 #Solução abaixo foi implementada pois o modulo npm do ansible não está funcional com a versão 6.4.1 que foi instalada juntamente com o node LTS através no nvm.
     - name: Instalação npm 3.5.2
@@ -36,7 +57,7 @@
       npm:
        name: express
        global: no
-       path: /var/www/nodejs/app_v{{version_nodeapp}}.js    
+       path: /var/www/nodejs/releases/app_v{{version_nodeapp}}.js    
        state: present
     - name:  Instalação pm2
       become: yes
@@ -51,30 +72,8 @@
         src: /usr/bin/nodejs
         dest: /usr/bin/node
         state: link
+    - name: Remove processos pm2 antigos
+      command: pm2 delete all
     - name: Iniciar aplicação com pm2
       become_user: root
-      command: pm2 start {{project_path}}/app_v{{version_nodeapp}}.js/ -i max --watch
-#    - name: Definição de variáveis
-#      set_fact:
-#        release_path: "{{ project_path }}/releases/{{ lookup('pipe','date +%Y%m%d%H%M%S') }}"
-#        current_path: "{{ project_path }}/current"
-#    - name: Recuperar pasta de lançamento atual
-#      command: readlink -f current
-#      register: current_release_path
-#      ignore_errors: yes
-#      args:
-#        chdir: "{{ project_path }}"
-#    - name: Create new folder
-#      file:
-#        dest={{ release_path }}
-#        mode=0755
-#        recurse=yes
-#        state=directory
-#    - name: Update symlink
-#      file:
-#        src={{ release_path }}
-#        dest={{ current_path }}
-#        state=link
-#    - name: Remover versão antiga de aplicação no pm2
-#      command: pm2 delete ws-node
-#     ignore_errors: yes
+      command: pm2 start {{project_path}}/current/app_v{{version_nodeapp}}.js/ -i max --watch
